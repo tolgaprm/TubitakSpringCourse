@@ -8,9 +8,9 @@ import java.util.Date;
 public class User {
     @NotBlank
     public String name;
-    @NotBlank
+    @NotBlank(message = "Surname can't be empty.")
     public String surname;
-    @NotBlank
+    @NotBlank(message = "Email can't be empty.")
     @Email
     public String email;
     @NotBlank
