@@ -29,7 +29,7 @@ public class SpringDataApplication {
         // System.out.println(bookRepository.findByTitleContainsIgnoreCase("Clean"));
         //System.out.println(bookRepository.findByAuthorAndAgeGreaterThan("Robert C. Martin", 10L));
         //  System.out.println(bookRepository.countByAuthor("Kent Beck"));
-        System.out.println(bookRepository.existsByAuthor("Martin Fowler"));
+        //System.out.println(bookRepository.existsByAuthor("Martin Fowler"));
     }
 
     private static void saveBooks(BookRepository bookRepository) {
