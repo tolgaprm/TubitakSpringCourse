@@ -6,7 +6,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -21,23 +20,29 @@ public class SecurityConfiguration {
     }
 
     private void createUser() throws Exception {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        UserDetails userDetails = User.builder()
-                .username("Tolga")
-                .password(passwordEncoder.encode("123456"))
+        UserDetails user = User.builder()
+                .username("user")
+                .password("user")
                 .authorities("ROLE_USER")
                 .build();
 
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password("admin")
+                .authorities("ROLE_ADMIN")
+                .build();
+
         authenticationManagerBuilder.inMemoryAuthentication()
-                .withUser(userDetails)
-                .passwordEncoder(passwordEncoder);
+                .withUser(user)
+                .withUser(admin)
+                .passwordEncoder(NoOpPasswordEncoder.getInstance());
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/hello")).hasRole("ROLE_USER")
-                .anyRequest().authenticated()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/user")).hasAnyRole("USER", "ADMIN")
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/admin")).hasRole("ADMIN")
                 .and()
                 .formLogin()
                 .and()
