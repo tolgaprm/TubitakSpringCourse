@@ -2,25 +2,20 @@ package yte.intern.springsecurity.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import yte.intern.springsecurity.customAuth.CustomDetailsService;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import yte.intern.springsecurity.customAuth.CustomAuthenticationProvider;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfiguration {
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final CustomDetailsService customDetailsService;
-
-    public SecurityConfiguration(AuthenticationManagerBuilder authenticationManagerBuilder, CustomDetailsService customDetailsService) throws Exception {
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
-        this.customDetailsService = customDetailsService;
-        createUser();
-    }
-
     private void createUser() throws Exception {
 //        UserDetails user = User.builder()
 //                .username("user")
@@ -34,18 +29,23 @@ public class SecurityConfiguration {
 //                .authorities("ROLE_ADMIN")
 //                .build();
 
-        authenticationManagerBuilder
-                .userDetailsService(customDetailsService)
-                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+        //  authenticationManagerBuilder
+        //        .authenticationProvider(customAuthenticationProvider);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests()
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .and()
+        return http.authorizeHttpRequests(authorize ->
+                        authorize.requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+                                .anyRequest().authenticated()
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(CustomAuthenticationProvider customAuthenticationProvider) {
+        return new ProviderManager(customAuthenticationProvider);
     }
 }
